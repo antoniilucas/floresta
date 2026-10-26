@@ -10,6 +10,7 @@ import { Input } from './controls/Input.js';
 import { PlayerController } from './controls/PlayerController.js';
 import { ThirdPersonCamera } from './controls/ThirdPersonCamera.js';
 import { Hud } from './ui/Hud.js';
+import { Wizard } from './entities/Wizard.js';
 
 const params = new URLSearchParams(location.search);
 const quality = CONFIG.quality[params.get('quality') === 'low' ? 'low' : 'high'];
@@ -93,10 +94,59 @@ async function main() {
     return knight;
   }
 
-  const player = await spawnKnight(CONFIG.spawns.player, 'Cavaleiro');
+  async function spawnWizard(spawn) {
+    const Wizard = await Wizard.create(
+      'assets/models/Wizard.glb',
+      'Mago'
+  );
 
-  // Demonstração do 2º personagem: abra com ?second=1 (ou chame spawnKnight() depois)
-  if (params.get('second') === '1') await spawnKnight(CONFIG.spawns.second, 'Cavaleiro 2');
+  wizard.setPosition(
+    spawn.x,
+    terrain.heightAt(spawn.x, spawn.z),
+    spawn.z
+  );
+
+  scene.add(wizard.root);
+  characters.push(wizard);
+
+  return wizard;
+}
+
+  const player = await spawnWizard(CONFIG.spawns.player, 'Mago');
+
+  let Wizard = null;
+
+if (params.get('second') === '1') {
+  Wizard = await spawnWizard(
+    CONFIG.spawns.second
+  );
+
+window.addEventListener('keydown', (event) => {
+  if (!Wizard) return;
+
+  if (
+    event.repeat ||
+    ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)
+  ) {
+    return;
+  }
+
+  switch (event.key) {
+    case '1':
+      Wizard.play('idle');
+      break;
+
+    case '2':
+      Wizard.play('walk');
+      break;
+
+    case '3':
+      Wizard.play('attack');
+      break;
+  }
+});
+
+}
 
   // ------------------------------------------------------------ controles
   const input = new Input(canvas);
