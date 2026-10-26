@@ -1,0 +1,14 @@
+{
+  "name": "floresta-cavaleiro",
+  "version": "1.0.0",
+  "description": "Cena 3D interativa em Three.js: cavaleiro animado numa floresta grande low poly.",
+  "private": true,
+  "scripts": {
+    "start": "node tools/serve.mjs",
+    "build:knight": "python3 tools/build_knight.py"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}
