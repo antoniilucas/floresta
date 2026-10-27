@@ -45,7 +45,7 @@ export class Wizard {
 
     const clips = gltf.animations;
 
-    const findClip = (pattern, fallbackIndex) => {
+    const findClip = (pattern, fallbackIndex = -1) => {
       return clips.find((clip) => pattern.test(clip.name))
         || clips[fallbackIndex]
         || null;
@@ -53,16 +53,47 @@ export class Wizard {
 
     this.clips = {
       idle: findClip(/idle|stand|breath/i, 0),
-      walk: findClip(/walk|run|move/i, 1),
-      attack: findClip(/attack|hit|slash/i, 2)
+      walk: findClip(/walk|run|move/i, clips.length === 1 ? 0 : -1),
+      attack: findClip(/attack|hit|slash/i, clips.length === 1 ? 0 : -1),
     };
 
+    if (new Set([this.clips.idle, this.clips.walk, this.clips.attack]).size < 3) {
+      console.warn('O GLB do mago não contém clipes distintos para idle, walk e attack.');
+    }
+
     this.currentAction = null;
+    this.moving = false;
     this.play('idle');
+  }
+
+  get position() {
+    return this.root.position;
+  }
+
+  get yaw() {
+    return this.root.rotation.y;
+  }
+
+  set yaw(value) {
+    this.root.rotation.y = value;
+  }
+
+  get canMove() {
+    return true;
+  }
+
+  get drawn() {
+    return false;
   }
 
   setPosition(x, y, z) {
     this.root.position.set(x, y, z);
+  }
+
+  setMoving(moving) {
+    if (this.moving === moving) return;
+    this.moving = moving;
+    this.play(moving ? 'walk' : 'idle');
   }
 
   play(type) {

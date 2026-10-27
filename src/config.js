@@ -6,25 +6,14 @@ export const CONFIG = {
     knight: 'assets/models/knight.glb',
     knightScale: 1.0, // ajuste se quiser alterar a proporção do cavaleiro
     forest: 'assets/models/realistic_forest.glb',
+    wizard: 'assets/models/Wizard.glb',
     forestWidth: 150,
   },
 
   world: {
-    size: 400,            // 400 x 400 m (160 mil m²)
-    segments: 160,        // resolução do terreno
-    clearingRadius: 38,   // clareira central livre (sem árvores/pedras grandes)
-    hillHeight: 9,        // amplitude das colinas fora da clareira
-    edgeMargin: 6,        // distância mínima da borda do mapa
-    importedForest: { x: 70, z: 0, clearRadius: 82 },
-  },
-
-  forest: {
-    trees: 0,
-    rocks: 0,
-    logs: 0,
-    grass: 2200,
-    flowers: 180,
-    chunkSize: 100,       // tamanho dos blocos usados para frustum culling
+    size: 150,
+    edgeMargin: 6,
+    importedForest: { x: 0, z: 0 },
   },
 
   // "?quality=low" na URL usa o preset low
@@ -48,10 +37,10 @@ export const CONFIG = {
   },
 
   camera: {
-    distance: 7.5,
-    minDistance: 3.5,
-    maxDistance: 16,
-    pitch: 0.38,
+    distance: 24,
+    minDistance: 8,
+    maxDistance: 35,
+    pitch: 0.65,
     focusHeight: 1.5,
     followSharpness: 8,
     keyRotateSpeed: 1.8,

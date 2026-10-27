@@ -1,17 +1,23 @@
 // Teclado + mouse. Ações em vez de teclas cruas, para facilitar remapear.
-const KEYMAP = {
-  KeyW: 'forward', ArrowUp: 'forward',
-  KeyS: 'back', ArrowDown: 'back',
-  KeyA: 'left', ArrowLeft: 'left',
-  KeyD: 'right', ArrowRight: 'right',
+export const PLAYER_ONE_KEYMAP = {
+  KeyW: 'forward',
+  KeyS: 'back',
+  KeyA: 'left',
+  KeyD: 'right',
   KeyQ: 'camLeft', KeyR: 'camRight',
   KeyE: 'sword',
   Space: 'attack', KeyF: 'attack',
 };
+export const PLAYER_TWO_KEYMAP = {
+  ArrowUp: 'forward',
+  ArrowDown: 'back',
+  ArrowLeft: 'left',
+  ArrowRight: 'right',
+};
 const HELD = new Set(['forward', 'back', 'left', 'right', 'camLeft', 'camRight']);
 
 export class Input {
-  constructor(canvas) {
+  constructor(canvas, { keymap = PLAYER_ONE_KEYMAP, capturePointer = true } = {}) {
     this.down = new Set();
     this.listeners = new Map();
     this.look = { dx: 0, dy: 0, wheel: 0 };
@@ -19,17 +25,19 @@ export class Input {
 
     window.addEventListener('keydown', (e) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return; // não atrapalha Ctrl+R, Ctrl+F...
-      const action = KEYMAP[e.code];
+      const action = keymap[e.code];
       if (!action) return;
       e.preventDefault();
       if (HELD.has(action)) this.down.add(action);
       else if (!e.repeat) this._emit(action);
     });
     window.addEventListener('keyup', (e) => {
-      const action = KEYMAP[e.code];
+      const action = keymap[e.code];
       if (action) this.down.delete(action);
     });
     window.addEventListener('blur', () => this.down.clear());
+
+    if (!capturePointer) return;
 
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     canvas.addEventListener('pointerdown', (e) => {
