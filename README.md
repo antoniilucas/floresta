@@ -1,8 +1,7 @@
 # 🛡️ Floresta do Cavaleiro — Three.js
 
-Cena 3D interativa: um cavaleiro animado explora uma floresta low poly **grande (400 × 400 m)**,
-com câmera em terceira pessoa, sombras suaves, céu com nuvens e uma clareira central livre
-já reservada para o **segundo personagem**.
+Cena 3D interativa: um cavaleiro animado explora o mapa de floresta importado em GLB
+(150 × 150 m), com câmera em terceira pessoa, sombras suaves e céu com nuvens.
 
 ## Como rodar
 
@@ -20,16 +19,17 @@ Requisitos: um navegador com WebGL (Chrome, Edge, Firefox, Safari) e **internet 
 abertura** — o Three.js é carregado do CDN jsDelivr (versão fixa 0.160.0). O servidor local incluído não
 precisa baixar pacotes. Para rodar offline, veja abaixo.
 
-PC fraco ou celular? Abra com **`http://localhost:8080/?quality=low`** (metade da vegetação,
-sombras menores, sem pixel-ratio alto).
+PC fraco ou celular? Abra com **`http://localhost:8080/?quality=low`** (sombras menores e
+sem pixel-ratio alto).
 
 ## Controles
 
 | Tecla | Ação |
 |---|---|
-| **W A S D** ou **setas** | mover (relativo à câmera) → toca a animação *Walk* |
-| **E** | alternar a postura de combate |
-| **Espaço** ou **F** | ataque com a espada (*Sword Attack*) |
+| **W A S D** | jogador 1 (cavaleiro): mover |
+| **Setas** | jogador 2 (mago): mover |
+| **E** | cavaleiro: alternar a postura de combate |
+| **Espaço** ou **F** | cavaleiro: ataque com a espada (*Sword Attack*) |
 | **Arrastar o mouse** | girar a câmera |
 | **Q / R** | girar a câmera pelo teclado |
 | **Roda do mouse** | aproximar / afastar |
@@ -48,13 +48,14 @@ floresta-cavaleiro/
 │   ├── main.js             # monta renderer, mundo, personagens e o loop
 │   ├── config.js           # TODAS as configurações (tamanho do mapa, velocidade, câmera, céu…)
 │   ├── world/
-│   │   ├── Terrain.js      # terreno com colinas + clareira plana central
-│   │   ├── Forest.js       # árvores, pedras, troncos, grama, flores + colisão
+│   │   ├── Terrain.js      # terreno procedural legado (não usado na cena atual)
+│   │   ├── Forest.js       # vegetação procedural legada (não usada na cena atual)
 │   │   ├── Sky.js          # céu em gradiente, sol e nuvens
 │   │   ├── Lighting.js     # ambiente + hemisférica + sol com sombras que seguem o jogador
 │   │   └── noise.js        # ruído e RNG com semente (mapa sempre igual)
 │   ├── entities/
-│   │   └── Knight.js       # GLTFLoader + AnimationMixer + máquina de estados
+│   │   ├── Knight.js       # cavaleiro GLB + animações e máquina de estados
+│   └── Wizard.js       # segundo personagem GLB
 │   ├── controls/
 │   │   ├── Input.js        # teclado/mouse → ações
 │   │   ├── PlayerController.js  # ações → movimento do cavaleiro
@@ -67,17 +68,15 @@ floresta-cavaleiro/
 
 ## O mapa
 
-- **400 × 400 m** (a travessia de ponta a ponta leva ~2 minutos andando), com a floresta realista importada perto da área inicial e gramado aberto ao redor.
-- O bosque realista importado fica próximo ao ponto inicial; a clareira ampla mantém espaço para explorar e acomodar o segundo personagem.
-- Limite invisível nas bordas do terreno.
-- Leve: o restante da vegetação procedural antiga foi desativado para deixar o modelo importado visível e o mapa aberto.
+- **150 m de largura**, usando somente `realistic_forest.glb`. O terreno é alinhado a partir das superfícies incluídas no próprio GLB; não é criado um segundo cenário procedural.
+- O cavaleiro e o mago começam juntos no mapa. O cavaleiro é controlado com WASD e o mago com as setas.
+- A câmera compartilhada enquadra o ponto médio entre os jogadores.
 
-Mude tamanho, quantidades, cores do céu, velocidade etc. em **`src/config.js`**.
+Mude escala do mapa, cores do céu e velocidade em **`src/config.js`**.
 ## Adicionando o 2º personagem
 
-O ponto de nascimento já existe em `CONFIG.spawns.second` e o `Knight` não depende do teclado,
-então qualquer controlador pode dirigi-lo. Para ver funcionando, abra `http://localhost:8080/?second=1`
-(um segundo cavaleiro aparece parado ao lado do primeiro). No código, o caminho é:
+O ponto de nascimento do mago já existe em `CONFIG.spawns.second`; ele é criado junto com o cavaleiro
+e controlado pelas setas. No código, o cavaleiro pode ser criado novamente com:
 
 ```js
 // em src/main.js (spawnKnight já está pronto)
@@ -98,7 +97,10 @@ do `main.js` — o loop já chama `update(dt)` de todos. Pelo console do navegad
   as animações `rig|Basic_Walk`, `rig|Run_Cycle` e `rig|Sword_attacK`. O controle usa Walk para andar,
   Attack para golpear e segura o primeiro quadro de Walk como pose parada, pois o modelo não tem Idle.
   A tecla E usa o primeiro quadro do ataque como postura de combate; este asset não inclui animação Draw.
-- **Mapa importado:** `assets/models/realistic_forest.glb` é uma cena realista do Sketchfab, ampliada para cerca de 150 m e posicionada junto à área inicial. A vegetação procedural antiga foi desativada para o cenário importado aparecer claramente; o restante do mapa fica aberto para movimentação e para o segundo personagem.
+- **Mapa:** `assets/models/realistic_forest.glb` fornece a floresta e as superfícies do chão. A cena posiciona os jogadores sobre essas superfícies e não adiciona um mapa procedural separado.
+- **Mago:** `assets/models/Wizard.glb` contém atualmente apenas um clipe (`Take 001`). Para ter idle,
+  walk e attack distintos no segundo personagem, o GLB precisa ser exportado novamente com os três clipes.
+  Enquanto isso, o mago pode se mover pelas setas e reutiliza esse clipe único.
 - **Créditos/licenças:** consulte [`assets/models/ATTRIBUTION.md`](assets/models/ATTRIBUTION.md).
 - **Gerador opcional:** `python3 tools/build_knight.py` gera uma versão procedural separada em
   `assets/models/knight-procedural.glb`; não sobrescreve o cavaleiro do Sketchfab.
@@ -118,6 +120,6 @@ coloque em `vendor/three/` e troque o `importmap` do `index.html`:
 - **Tela de carregamento parada / erro vermelho:** abriu com duplo clique (`file://`) ou está sem internet
   para o CDN. Use o `start.bat`/`start.sh`.
 - **Porta 8080 ocupada:** `PORT=9000 npm start` ou `PORT=9000 ./start.sh` (ou mude no `start.bat`).
-- **Pouco FPS:** use `?quality=low` ou reduza `forest.trees`/`forest.grass` em `config.js`.
+- **Pouco FPS:** use `?quality=low` para reduzir o custo das sombras e do pixel-ratio.
 
 Three.js © mrdoob e colaboradores, licença MIT.

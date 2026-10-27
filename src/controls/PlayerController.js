@@ -6,17 +6,17 @@ function dampAngle(current, target, speed, dt) {
 }
 
 export class PlayerController {
-  constructor({ knight, input, camera, terrain, forest, cfg, worldCfg }) {
+  constructor({ knight, input, camera, terrain, cfg, worldCfg }) {
     this.knight = knight;
     this.input = input;
     this.camera = camera; // ThirdPersonCamera (precisa de .yaw)
     this.terrain = terrain;
-    this.forest = forest;
     this.cfg = cfg;
-    this.limit = worldCfg.size / 2 - worldCfg.edgeMargin;
+    this.limitX = (worldCfg.mapBounds?.x ?? worldCfg.size) / 2 - worldCfg.edgeMargin;
+    this.limitZ = (worldCfg.mapBounds?.z ?? worldCfg.size) / 2 - worldCfg.edgeMargin;
 
-    input.on('sword', () => knight.toggleSword());
-    input.on('attack', () => knight.attack());
+    input.on('sword', () => knight.toggleSword?.());
+    input.on('attack', () => knight.attack?.());
   }
 
   update(dt) {
@@ -24,7 +24,7 @@ export class PlayerController {
     const ix = (input.isDown('right') ? 1 : 0) - (input.isDown('left') ? 1 : 0);
     const iz = (input.isDown('forward') ? 1 : 0) - (input.isDown('back') ? 1 : 0);
 
-    if (knight.canMove && (ix !== 0 || iz !== 0)) {
+    if (knight.canMove !== false && (ix !== 0 || iz !== 0)) {
       // movimento relativo à câmera: W = para longe da câmera
       const s = Math.sin(this.camera.yaw), c = Math.cos(this.camera.yaw);
       let dx = -s * iz + c * ix;
@@ -38,9 +38,8 @@ export class PlayerController {
       const p = knight.position;
       p.x += dx * speed * dt;
       p.z += dz * speed * dt;
-      this.forest.resolveCollisions(p, cfg.radius);
-      p.x = Math.max(-this.limit, Math.min(this.limit, p.x));
-      p.z = Math.max(-this.limit, Math.min(this.limit, p.z));
+      p.x = Math.max(-this.limitX, Math.min(this.limitX, p.x));
+      p.z = Math.max(-this.limitZ, Math.min(this.limitZ, p.z));
       p.y = this.terrain.heightAt(p.x, p.z);
       knight.setMoving(true, speed);
     } else {
